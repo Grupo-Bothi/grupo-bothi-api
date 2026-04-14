@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: grupo-bothi-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: DATABASE_URL
+        sync: false        # Lo pones manualmente en el dashboard de Render
+      - key: RAILS_MASTER_KEY
+        sync: false        # Lo pones manualmente en el dashboard de Render
+      - key: SECRET_KEY_BASE
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
