@@ -89,11 +89,14 @@ production:
     <<: *primary_production
     url: <%= ENV["DATABASE_URL"] %>
     migrations_paths: db/cache_migrate
+    prepared_statements: false
   queue:
     <<: *primary_production
     url: <%= ENV["DATABASE_URL"] %>
     migrations_paths: db/queue_migrate
+    prepared_statements: false
   cable:
     <<: *primary_production
     url: <%= ENV["DATABASE_URL"] %>
     migrations_paths: db/cable_migrate
+    prepared_statements: false
