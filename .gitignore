@@ -34,3 +34,9 @@
 /config/master.key
 
 /config/credentials/production.key
+
+.agents
+
+mise.toml
+
+skills-lock.json
