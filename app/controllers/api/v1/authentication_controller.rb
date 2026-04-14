@@ -4,6 +4,13 @@ module Api::V1
     rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :handle_record_invalid
 
+    before_action :authenticate_request, only: [:me]
+
+    # GET /api/v1/auth/me
+    def me
+      render json: { user: UserSerializer.new(current_user) }, status: :ok
+    end
+
     # POST /api/v1/auth/login
     def login
       validate_login_params

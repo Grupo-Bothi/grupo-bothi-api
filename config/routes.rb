@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Authentication routes
       post "/auth/login", to: "authentication#login"
+      get  "/auth/me",    to: "authentication#me"
 
       # User routes
       resources :users do
@@ -31,7 +32,9 @@ Rails.application.routes.draw do
       end
 
       # Upload routes
-      post "/uploads", to: "uploads#create"
+      get    "/uploads",     to: "uploads#index"
+      get    "/uploads/:id", to: "uploads#show"
+      post   "/uploads",     to: "uploads#create"
       delete "/uploads/:id", to: "uploads#destroy"
     end
   end
