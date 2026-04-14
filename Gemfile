@@ -73,6 +73,10 @@ gem "pagy"
 
 gem "resend"
 
+# Image uploads
+gem "cloudinary", "~> 2.0"      # Opción 1: Cloudinary (25 GB free)
+gem "aws-sdk-s3", require: false # Opción 2 y 3: Backblaze B2 / Supabase (S3-compatible)
+
 # Gemfile
 group :development, :test do
   gem "pry-rails"

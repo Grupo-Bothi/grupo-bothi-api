@@ -29,6 +29,10 @@ Rails.application.routes.draw do
         post "/reset", to: "passwords#reset"                      # Send password reset email
         put "/update_with_token", to: "passwords#update_with_token" # Update password using reset token
       end
+
+      # Upload routes
+      post "/uploads", to: "uploads#create"
+      delete "/uploads/:id", to: "uploads#destroy"
     end
   end
 end
