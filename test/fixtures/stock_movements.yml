@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  product: one
+  company: one
+  movement_type: 1
+  qty: 1
+  note: MyString
+
+two:
+  product: two
+  company: two
+  movement_type: 1
+  qty: 1
+  note: MyString

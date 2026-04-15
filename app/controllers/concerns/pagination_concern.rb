@@ -10,7 +10,7 @@ module PaginationConcern
 
     def pagy_info(pagy)
       {
-        page_size: pagy.vars[:items].to_i,
+        page_size: pagy.vars[:limit].to_i,
         page_index: pagy.page,
         total: pagy.count,
         page_start: pagy.from,

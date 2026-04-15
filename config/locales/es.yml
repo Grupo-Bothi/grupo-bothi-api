@@ -1,0 +1,35 @@
+es:
+  errors:
+    default: "Algo salió mal"
+    internal: "Error interno del servidor"
+    bad_request: "Solicitud incorrecta"
+    unauthorized: "No autorizado"
+    forbidden: "Acceso denegado"
+    not_found: "No encontrado"
+    unprocessable: "Error de validación"
+    resource_not_found: "Recurso no encontrado"
+    validation_failed: "La validación ha fallado"
+
+  auth:
+    header_missing: "Encabezado de autorización faltante"
+    invalid_credentials: "Credenciales de usuario inválidas"
+    user_not_found_token: "Usuario no encontrado con el token proporcionado"
+    invalid_token: "Token inválido"
+    token_expired: "El token ha expirado"
+    relogin: "Por favor inicia sesión nuevamente para obtener un nuevo token"
+    failed: "Autenticación fallida"
+    invalid_or_expired: "Token inválido o expirado"
+    not_authorized: "No tienes autorización para realizar esta acción"
+    no_company: "Usuario sin empresa asignada"
+
+  employees:
+    deactivated: "Empleado desactivado"
+    checkin_open: "Ya tiene una entrada registrada sin salida"
+    no_checkin: "No hay entrada registrada"
+
+  products:
+    deleted: "Producto eliminado"
+    insufficient_stock: "Stock insuficiente. Disponible: %{available}"
+
+  users:
+    not_found: "Usuario no encontrado"

@@ -6,32 +6,32 @@ module Authenticable
     authorization_header = request.headers["Authorization"]
 
     unless authorization_header
-      raise ApiErrors::UnauthorizedError.new(message: "Authorization header is missing")
+      raise ApiErrors::UnauthorizedError.new(message: I18n.t("auth.header_missing"))
     end
 
     token = authorization_header.split(" ").last
 
     begin
-      decoded = jwt_decode(token)
-      @current_user = User.find(decoded[:user_id])
-    rescue ActiveRecord::RecordNotFound => e
+      decoded        = jwt_decode(token)
+      @current_user  = User.find(decoded[:user_id])
+    rescue ActiveRecord::RecordNotFound
       raise ApiErrors::UnauthorizedError.new(
-        message: "Invalid user credentials",
-        details: "User not found with provided token",
+        message: I18n.t("auth.invalid_credentials"),
+        details: I18n.t("auth.user_not_found_token"),
+      )
+    rescue JWT::ExpiredSignature
+      raise ApiErrors::UnauthorizedError.new(
+        message: I18n.t("auth.token_expired"),
+        details: I18n.t("auth.relogin"),
       )
     rescue JWT::DecodeError => e
       raise ApiErrors::UnauthorizedError.new(
-        message: "Invalid token",
+        message: I18n.t("auth.invalid_token"),
         details: e.message,
-      )
-    rescue JWT::ExpiredSignature => e
-      raise ApiErrors::UnauthorizedError.new(
-        message: "Token has expired",
-        details: "Please login again to get a new token",
       )
     rescue => e
       raise ApiErrors::UnauthorizedError.new(
-        message: "Authentication failed",
+        message: I18n.t("auth.failed"),
         details: e.message,
       )
     end

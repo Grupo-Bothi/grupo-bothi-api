@@ -6,11 +6,11 @@ module Api::V1
     def index
       users = User.by_email(params[:email])
         .by_role(params[:role])
-        .by_text(params[:text])
+        .search(params[:search] || params[:text])
         .excluding_system_emails
-        .sorted
 
-      @pagy, @users = pagy(users, items: params[:limit])
+      users = apply_sort(users, allowed: %i[first_name email role created_at], default: :created_at, default_dir: :desc)
+      @pagy, @users = pagy(users)
       render json: paginate_response(@pagy, @users)
     end
 
@@ -60,7 +60,7 @@ module Api::V1
     def set_user
       @user = User.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      raise ApiErrors::NotFoundError.new(message: "User not found")
+      raise ApiErrors::NotFoundError.new(message: I18n.t("users.not_found"))
     end
 
     def send_password_reset_email(user)

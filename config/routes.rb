@@ -1,41 +1,43 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
   namespace :api do
     namespace :v1 do
-      # Authentication routes
-      post "/auth/login", to: "authentication#login"
-      get  "/auth/me",    to: "authentication#me"
+      # Auth
+      post "auth/login", to: "authentication#login"
+      get  "auth/me",    to: "authentication#me"
 
-      # User routes
+      # Passwords
+      put  "passwords/update",            to: "passwords#update"
+      post "passwords/reset",             to: "passwords#reset"
+      put  "passwords/update_with_token", to: "passwords#update_with_token"
+
+      # Users
       resources :users do
+        member { patch :update_active }
+      end
+
+      # Uploads
+      resources :uploads, only: [:index, :show, :create, :destroy]
+
+      # Company
+      resource :company, only: [:show, :update]
+
+      # Employees + checkin/checkout + sus asistencias
+      resources :employees do
         member do
-          patch :update_active
+          post :checkin
+          post :checkout
         end
       end
 
-      # Password routes
-      scope "/passwords" do
-        put "/update", to: "passwords#update"                    # Update password for authenticated user
-        post "/reset", to: "passwords#reset"                      # Send password reset email
-        put "/update_with_token", to: "passwords#update_with_token" # Update password using reset token
-      end
+      # Asistencias (con filtros por employee, from, to)
+      resources :attendances, only: [:index]
 
-      # Upload routes
-      get    "/uploads",     to: "uploads#index"
-      get    "/uploads/:id", to: "uploads#show"
-      post   "/uploads",     to: "uploads#create"
-      delete "/uploads/:id", to: "uploads#destroy"
+      # Inventario
+      resources :products do
+        resources :stock_movements, only: [:index, :create]
+      end
     end
   end
 end

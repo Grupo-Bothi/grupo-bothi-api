@@ -1,8 +1,11 @@
+# config/initializers/cors.rb
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "*" # Cambia esto en producción
+    origins ENV.fetch("FRONTEND_URL", "http://localhost:4200")
+
     resource "*",
-      headers: :any,
-      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+      headers:  :any,
+      methods:  [:get, :post, :put, :patch, :delete, :options, :head],
+      expose:   ["Authorization"]
   end
 end

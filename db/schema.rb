@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_13_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,65 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "attendances", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.bigint "company_id", null: false
+    t.datetime "checkin_at"
+    t.datetime "checkout_at"
+    t.decimal "lat"
+    t.decimal "lng"
+    t.integer "attendance_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_attendances_on_company_id"
+    t.index ["employee_id"], name: "index_attendances_on_employee_id"
+  end
+
+  create_table "companies", force: :cascade do |t|
+    t.string "name"
+    t.string "slug"
+    t.integer "plan"
+    t.string "stripe_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "employees", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.string "name"
+    t.string "position"
+    t.string "department"
+    t.decimal "salary"
+    t.integer "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_employees_on_company_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.string "sku"
+    t.string "name"
+    t.integer "stock"
+    t.integer "min_stock"
+    t.decimal "unit_cost"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_products_on_company_id"
+  end
+
+  create_table "stock_movements", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "company_id", null: false
+    t.integer "movement_type"
+    t.integer "qty"
+    t.string "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_stock_movements_on_company_id"
+    t.index ["product_id"], name: "index_stock_movements_on_product_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "first_name"
     t.string "email"
@@ -54,8 +113,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000000) do
     t.string "phone"
     t.boolean "active", default: false
     t.integer "role"
+    t.bigint "company_id"
+    t.index ["company_id"], name: "index_users_on_company_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "attendances", "companies"
+  add_foreign_key "attendances", "employees"
+  add_foreign_key "employees", "companies"
+  add_foreign_key "products", "companies"
+  add_foreign_key "stock_movements", "companies"
+  add_foreign_key "stock_movements", "products"
+  add_foreign_key "users", "companies"
 end

@@ -1,3 +1,5 @@
-Pagy::DEFAULT[:items] = 20
-Pagy::DEFAULT[:items_param] = :limit
-Pagy::DEFAULT[:max_items] = 100
+require "pagy/extras/limit"
+
+Pagy::DEFAULT[:limit]       = 20
+Pagy::DEFAULT[:limit_param] = :page_size
+Pagy::DEFAULT[:limit_max]   = 100

@@ -1,13 +1,10 @@
 # app/models/user.rb
 class User < ApplicationRecord
-  has_secure_password validations: false
+  include JwtHelper
+  belongs_to :company, optional: true
+  has_secure_password
 
-  #Enums
-  enum :role, {
-    user: 0,
-    admin: 1,
-    super_admin: 2,
-  }, default: :user
+  enum :role, { staff: 0, manager: 1, admin: 2, owner: 3 }, default: :staff
 
   # Scopes para filtros
   scope :by_email, ->(email) { where("email LIKE ?", "%#{email}%") if email.present? }
@@ -24,6 +21,7 @@ class User < ApplicationRecord
 
           where(where_query, text: "%#{text}%")
         }
+  scope :search, ->(q) { by_text(q) }
 
   # Validaciones
   validates :first_name, presence: true, length: { maximum: 50 }

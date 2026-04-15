@@ -1,31 +1,35 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  errors:
+    default: "Something went wrong"
+    internal: "Internal server error"
+    bad_request: "Bad request"
+    unauthorized: "Unauthorized"
+    forbidden: "Forbidden"
+    not_found: "Not found"
+    unprocessable: "Validation error"
+    resource_not_found: "Resource not found"
+    validation_failed: "Validation failed"
+
+  auth:
+    header_missing: "Authorization header is missing"
+    invalid_credentials: "Invalid user credentials"
+    user_not_found_token: "User not found with provided token"
+    invalid_token: "Invalid token"
+    token_expired: "Token has expired"
+    relogin: "Please login again to get a new token"
+    failed: "Authentication failed"
+    invalid_or_expired: "Invalid or expired token"
+    not_authorized: "You are not authorized to perform this action"
+    no_company: "User has no company assigned"
+
+  employees:
+    deactivated: "Employee deactivated"
+    checkin_open: "Employee already has an open check-in"
+    no_checkin: "No active check-in found"
+
+  products:
+    deleted: "Product deleted"
+    insufficient_stock: "Insufficient stock. Available: %{available}"
+
+  users:
+    not_found: "User not found"
