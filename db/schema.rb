@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_16_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,7 +74,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.string "email"
+    t.string "phone"
     t.index ["company_id"], name: "index_employees_on_company_id"
+    t.index ["email"], name: "index_employees_on_email", unique: true, where: "(email IS NOT NULL)"
+    t.index ["user_id"], name: "index_employees_on_user_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -86,6 +91,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
     t.decimal "unit_cost"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "price", precision: 10, scale: 2
+    t.string "category"
+    t.text "description"
+    t.boolean "available", default: true, null: false
+    t.index ["available"], name: "index_products_on_available"
+    t.index ["category"], name: "index_products_on_category"
     t.index ["company_id"], name: "index_products_on_company_id"
   end
 
@@ -101,6 +112,27 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
     t.index ["product_id"], name: "index_stock_movements_on_product_id"
   end
 
+  create_table "units", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.string "group", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group"], name: "index_units_on_group"
+    t.index ["key"], name: "index_units_on_key", unique: true
+  end
+
+  create_table "user_companies", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_user_companies_on_company_id"
+    t.index ["user_id", "company_id"], name: "index_user_companies_on_user_id_and_company_id", unique: true
+    t.index ["user_id"], name: "index_user_companies_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "first_name"
     t.string "email"
@@ -113,8 +145,54 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
     t.string "phone"
     t.boolean "active", default: false
     t.integer "role"
-    t.bigint "company_id"
-    t.index ["company_id"], name: "index_users_on_company_id"
+  end
+
+  create_table "work_order_attachments", force: :cascade do |t|
+    t.bigint "work_order_id", null: false
+    t.string "uploaded_by_type", null: false
+    t.bigint "uploaded_by_id", null: false
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uploaded_by_type", "uploaded_by_id"], name: "index_work_order_attachments_on_uploaded_by"
+    t.index ["work_order_id"], name: "index_work_order_attachments_on_work_order_id"
+  end
+
+  create_table "work_order_items", force: :cascade do |t|
+    t.bigint "work_order_id", null: false
+    t.string "description"
+    t.decimal "quantity"
+    t.string "unit"
+    t.integer "status"
+    t.integer "position"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "product_id"
+    t.decimal "unit_price", precision: 10, scale: 2
+    t.index ["product_id"], name: "index_work_order_items_on_product_id"
+    t.index ["work_order_id"], name: "index_work_order_items_on_work_order_id"
+  end
+
+  create_table "work_orders", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "employee_id"
+    t.string "created_by_type", null: false
+    t.bigint "created_by_id", null: false
+    t.string "title"
+    t.text "description"
+    t.integer "priority"
+    t.integer "status"
+    t.datetime "due_date"
+    t.datetime "completed_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
+    t.index ["company_id"], name: "index_work_orders_on_company_id"
+    t.index ["created_by_type", "created_by_id"], name: "index_work_orders_on_created_by"
+    t.index ["created_by_type", "created_by_id"], name: "index_work_orders_on_created_by_type_and_created_by_id"
+    t.index ["employee_id"], name: "index_work_orders_on_employee_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -122,8 +200,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_194344) do
   add_foreign_key "attendances", "companies"
   add_foreign_key "attendances", "employees"
   add_foreign_key "employees", "companies"
+  add_foreign_key "employees", "users"
   add_foreign_key "products", "companies"
   add_foreign_key "stock_movements", "companies"
   add_foreign_key "stock_movements", "products"
-  add_foreign_key "users", "companies"
+  add_foreign_key "user_companies", "companies"
+  add_foreign_key "user_companies", "users"
+  add_foreign_key "work_order_attachments", "work_orders"
+  add_foreign_key "work_order_items", "products"
+  add_foreign_key "work_order_items", "work_orders"
+  add_foreign_key "work_orders", "companies"
+  add_foreign_key "work_orders", "employees"
 end

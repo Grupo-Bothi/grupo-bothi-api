@@ -1,17 +1,19 @@
 module Api::V1
-  class UsersController < ApplicationController
+  class UsersController < BaseController
     before_action :set_user, only: [:show, :update, :destroy, :update_active]
 
     # GET /api/v1/users
     def index
-      users = User.by_email(params[:email])
+      users = User.includes(:companies)
+        .by_email(params[:email])
         .by_role(params[:role])
         .search(params[:search] || params[:text])
         .excluding_system_emails
 
       users = apply_sort(users, allowed: %i[first_name email role created_at], default: :created_at, default_dir: :desc)
       @pagy, @users = pagy(users)
-      render json: paginate_response(@pagy, @users)
+      serialized = ActiveModelSerializers::SerializableResource.new(@users).as_json
+      render json: paginate_response(@pagy, serialized)
     end
 
     # GET /api/v1/users/1
@@ -71,31 +73,21 @@ module Api::V1
 
     def render_error_response
       error = ApiErrors::UnprocessableEntityError.new(details: @user.errors)
-      render json: error.to_h, status: error.status
+      render json: error.as_json, status: error.status
     end
 
     def user_create_params
-      params.require(:user).permit(
-        :first_name,
-        :middle_name,
-        :last_name,
-        :second_last_name,
-        :email,
-        :phone
-      )
+      permitted = %i[first_name middle_name last_name second_last_name email phone]
+      permitted += [:role, :password, :active, company_ids: []] if current_user.role.in?(%w[admin owner super_admin])
+      params.require(:user).permit(*permitted)
     rescue ActionController::ParameterMissing => e
       raise ApiErrors::BadRequestError.new(message: e.message)
     end
 
     def user_update_params
-      params.require(:user).permit(
-        :first_name,
-        :middle_name,
-        :last_name,
-        :second_last_name,
-        :phone,
-        :password
-      )
+      permitted = %i[first_name middle_name last_name second_last_name phone password]
+      permitted += [:role, :active, company_ids: []] if current_user.role.in?(%w[admin owner super_admin])
+      params.require(:user).permit(*permitted)
     rescue ActionController::ParameterMissing => e
       raise ApiErrors::BadRequestError.new(message: e.message)
     end

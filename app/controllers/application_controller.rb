@@ -10,9 +10,11 @@ class ApplicationController < ActionController::API
   private
 
   def set_locale
-    header = request.env["HTTP_ACCEPT_LANGUAGE"]
-    lang   = header&.split(",")&.first&.split("-")&.first&.downcase&.to_sym
-    I18n.locale = I18n.available_locales.include?(lang) ? lang : I18n.default_locale
+    header = request.env["HTTP_LOCALE"] || request.env["HTTP_ACCEPT_LANGUAGE"]
+    lang   = header&.split(",")
+                   &.map { |l| l.split(";").first.split("-").first.strip.downcase.to_sym }
+                   &.find { |l| I18n.available_locales.include?(l) }
+    I18n.locale = lang || I18n.default_locale
   end
 
   def authentication_controller?

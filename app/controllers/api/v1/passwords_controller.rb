@@ -115,7 +115,6 @@ module Api::V1
     end
 
     def set_user_from_token
-      binding.pry
       token = params[:token]
 
       if token.blank?

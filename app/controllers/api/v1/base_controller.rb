@@ -3,6 +3,7 @@ module Api
   module V1
     class BaseController < ApplicationController
       include Authenticable
+      include Authorizable
 
       rescue_from ApiErrors::BaseError,          with: :handle_api_error
       rescue_from ActiveRecord::RecordNotFound,  with: :handle_not_found
@@ -22,8 +23,13 @@ module Api
       end
 
       def current_company
-        @current_company ||= current_user.company ||
-          raise(ApiErrors::ForbiddenError.new(details: I18n.t("auth.no_company")))
+        @current_company ||= begin
+          company_id = request.headers["X-Company-Id"].presence
+          raise ApiErrors::BadRequestError.new(details: I18n.t("auth.no_company")) if company_id.blank?
+          current_user.companies.find(company_id)
+        rescue ActiveRecord::RecordNotFound
+          raise ApiErrors::ForbiddenError.new(details: I18n.t("auth.no_company"))
+        end
       end
 
       def handle_api_error(error)

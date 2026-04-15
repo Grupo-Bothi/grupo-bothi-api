@@ -20,8 +20,9 @@ Rails.application.routes.draw do
       # Uploads
       resources :uploads, only: [:index, :show, :create, :destroy]
 
-      # Company
-      resource :company, only: [:show, :update]
+      # Company (usuario actual) + Companies (super_admin: CRUD global)
+      resource  :company,   only: [:show, :update]
+      resources :companies, only: [:index, :show, :create, :update, :destroy]
 
       # Employees + checkin/checkout + sus asistencias
       resources :employees do
@@ -34,10 +35,24 @@ Rails.application.routes.draw do
       # Asistencias (con filtros por employee, from, to)
       resources :attendances, only: [:index]
 
-      # Inventario
+      # Inventario / Menú
       resources :products do
+        collection { get :menu }
         resources :stock_movements, only: [:index, :create]
       end
+
+      resources :units, only: [:index]
+
+      resources :work_orders do
+        member do
+          patch :update_status
+          post   'items',                  to: 'work_orders#create_item',  as: :create_item
+          patch  'items/:item_id',         to: 'work_orders#update_item',  as: :update_item
+          delete 'items/:item_id',         to: 'work_orders#destroy_item', as: :destroy_item
+          patch  'items/:item_id/toggle',  to: 'work_orders#toggle_item',  as: :toggle_item
+        end
+      end
+      
     end
   end
 end

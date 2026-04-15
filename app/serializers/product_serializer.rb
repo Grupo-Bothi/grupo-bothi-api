@@ -6,13 +6,17 @@ class ProductSerializer
 
   def as_json(*)
     {
-      id:         @product.id,
-      sku:        @product.sku,
-      name:       @product.name,
-      stock:      @product.stock,
-      min_stock:  @product.min_stock,
-      unit_cost:  @product.unit_cost,
-      low_stock:  @product.stock <= @product.min_stock
+      id:          @product.id,
+      sku:         @product.sku,
+      name:        @product.name,
+      description: @product.description,
+      category:    @product.category,
+      price:       @product.price,
+      available:   @product.available,
+      stock:       @product.stock,
+      min_stock:   @product.min_stock,
+      unit_cost:   @product.unit_cost,
+      low_stock:   @product.min_stock.present? && @product.stock <= @product.min_stock
     }
   end
 end

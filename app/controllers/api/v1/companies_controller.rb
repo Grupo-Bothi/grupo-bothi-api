@@ -2,16 +2,58 @@
 module Api
   module V1
     class CompaniesController < BaseController
-      def show
-        render json: current_company
+      before_action :require_super_admin!, only: [:index, :create, :destroy]
+      before_action :set_company, only: [:show, :update, :destroy]
+
+      # GET /api/v1/companies — super_admin: lista todas las empresas
+      def index
+        companies = Company.includes(:users).order(created_at: :desc)
+        @pagy, companies = pagy(companies)
+        serialized = ActiveModelSerializers::SerializableResource.new(companies).as_json
+        render json: paginate_response(@pagy, serialized)
       end
 
+      # GET /api/v1/company  (singular, usuario actual)
+      # GET /api/v1/companies/:id  (super_admin por id)
+      def show
+        render json: @company
+      end
+
+      # POST /api/v1/companies — super_admin: crea empresa
+      def create
+        company = Company.new(company_params)
+        if company.save
+          render json: company, status: :created
+        else
+          raise ApiErrors::UnprocessableEntityError.new(details: company.errors.full_messages)
+        end
+      end
+
+      # PATCH /api/v1/company  (usuario actual)
+      # PATCH /api/v1/companies/:id  (super_admin por id)
       def update
-        current_company.update!(company_params)
-        render json: current_company
+        @company.update!(company_params)
+        render json: @company
+      end
+
+      # DELETE /api/v1/companies/:id — super_admin
+      def destroy
+        @company.destroy
+        head :no_content
       end
 
       private
+
+      def set_company
+        if params[:id].present?
+          require_super_admin!
+          @company = Company.find(params[:id])
+        else
+          @company = current_company
+        end
+      rescue ActiveRecord::RecordNotFound
+        raise ApiErrors::NotFoundError.new(message: I18n.t("companies.not_found"))
+      end
 
       def company_params
         params.require(:company).permit(:name, :plan)

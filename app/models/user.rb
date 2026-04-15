@@ -1,10 +1,12 @@
 # app/models/user.rb
 class User < ApplicationRecord
   include JwtHelper
-  belongs_to :company, optional: true
+  has_many :user_companies, dependent: :destroy
+  has_many :companies, through: :user_companies
   has_secure_password
-
-  enum :role, { staff: 0, manager: 1, admin: 2, owner: 3 }, default: :staff
+  has_many :created_work_orders, class_name: 'WorkOrder', as: :created_by
+  has_one :employee
+  enum :role, { staff: 0, manager: 1, admin: 2, owner: 3, super_admin: 4 }, default: :staff
 
   # Scopes para filtros
   scope :by_email, ->(email) { where("email LIKE ?", "%#{email}%") if email.present? }

@@ -9,6 +9,11 @@ es:
     unprocessable: "Error de validación"
     resource_not_found: "Recurso no encontrado"
     validation_failed: "La validación ha fallado"
+    messages:
+      not_a_number: "no es un número"
+      greater_than_or_equal_to: "debe ser mayor o igual a %{count}"
+      less_than_or_equal_to: "debe ser menor o igual a %{count}"
+      blank: "no puede estar vacío"
 
   auth:
     header_missing: "Encabezado de autorización faltante"
@@ -26,10 +31,29 @@ es:
     deactivated: "Empleado desactivado"
     checkin_open: "Ya tiene una entrada registrada sin salida"
     no_checkin: "No hay entrada registrada"
+    user_created: "Usuario creado y vinculado al empleado"
+    email_taken: "El correo electrónico ya está registrado"
 
   products:
     deleted: "Producto eliminado"
     insufficient_stock: "Stock insuficiente. Disponible: %{available}"
+    menu:
+      uncategorized: "Sin categoría"
 
   users:
     not_found: "Usuario no encontrado"
+
+  companies:
+    not_found: "Empresa no encontrada"
+
+  work_order:
+    status:
+      pending:     "Pendiente"
+      in_progress: "En progreso"
+      in_review:   "En revisión"
+      completed:   "Completada"
+    priority:
+      low:    "Baja"
+      medium: "Media"
+      high:   "Alta"
+      urgent: "Urgente"

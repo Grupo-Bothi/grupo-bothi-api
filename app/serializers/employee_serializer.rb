@@ -1,18 +1,16 @@
 # app/serializers/employee_serializer.rb
-class EmployeeSerializer
-  def initialize(employee)
-    @employee = employee
-  end
+class EmployeeSerializer < ActiveModel::Serializer
+  attributes :id, :name, :email, :phone, :position, :department, :salary, :status,
+             :created_at, :updated_at
 
-  def as_json(*)
+  attribute :user do
+    next nil unless object.user
+
     {
-      id:         @employee.id,
-      name:       @employee.name,
-      position:   @employee.position,
-      department: @employee.department,
-      salary:     @employee.salary,
-      status:     @employee.status,
-      created_at: @employee.created_at
+      id:     object.user.id,
+      email:  object.user.email,
+      role:   object.user.role,
+      active: object.user.active
     }
   end
 end

@@ -9,6 +9,11 @@ en:
     unprocessable: "Validation error"
     resource_not_found: "Resource not found"
     validation_failed: "Validation failed"
+    messages:
+      not_a_number: "is not a number"
+      greater_than_or_equal_to: "must be greater than or equal to %{count}"
+      less_than_or_equal_to: "must be less than or equal to %{count}"
+      blank: "can't be blank"
 
   auth:
     header_missing: "Authorization header is missing"
@@ -26,10 +31,17 @@ en:
     deactivated: "Employee deactivated"
     checkin_open: "Employee already has an open check-in"
     no_checkin: "No active check-in found"
+    user_created: "User created and linked to employee"
+    email_taken: "Email address is already registered"
 
   products:
     deleted: "Product deleted"
     insufficient_stock: "Insufficient stock. Available: %{available}"
+    menu:
+      uncategorized: "Uncategorized"
 
   users:
     not_found: "User not found"
+
+  companies:
+    not_found: "Company not found"
