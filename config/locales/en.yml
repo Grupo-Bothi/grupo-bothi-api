@@ -45,3 +45,24 @@ en:
 
   companies:
     not_found: "Company not found"
+
+  ticket:
+    status:
+      pending: "Pending payment"
+      paid:    "Paid"
+    already_paid: "This ticket has already been marked as paid"
+    not_found:    "Ticket not found"
+
+  work_order:
+    already_cancelled: "Work order is already cancelled"
+    status:
+      pending:     "Pending"
+      in_progress: "In progress"
+      in_review:   "In review"
+      completed:   "Completed"
+      cancelled:   "Cancelled"
+    priority:
+      low:    "Low"
+      medium: "Medium"
+      high:   "High"
+      urgent: "Urgent"

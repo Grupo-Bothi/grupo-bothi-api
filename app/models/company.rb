@@ -6,6 +6,7 @@ class Company < ApplicationRecord
   has_many :products
   has_many :stock_movements
   has_many :work_orders
+  has_many :tickets
 
   enum :plan, { starter: 0, business: 1, enterprise: 2 }, default: :starter
 

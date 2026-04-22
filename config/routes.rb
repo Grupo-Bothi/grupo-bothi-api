@@ -43,6 +43,13 @@ Rails.application.routes.draw do
 
       resources :units, only: [:index]
 
+      resources :tickets, only: [:index, :show] do
+        member do
+          patch :mark_as_paid
+          get   :download
+        end
+      end
+
       resources :work_orders do
         member do
           patch :update_status

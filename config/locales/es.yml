@@ -46,12 +46,21 @@ es:
   companies:
     not_found: "Empresa no encontrada"
 
+  ticket:
+    status:
+      pending: "Pendiente de pago"
+      paid:    "Pagado"
+    already_paid: "Este ticket ya fue marcado como pagado"
+    not_found:    "Ticket no encontrado"
+
   work_order:
+    already_cancelled: "La orden de trabajo ya está cancelada"
     status:
       pending:     "Pendiente"
       in_progress: "En progreso"
       in_review:   "En revisión"
       completed:   "Completada"
+      cancelled:   "Cancelada"
     priority:
       low:    "Baja"
       medium: "Media"

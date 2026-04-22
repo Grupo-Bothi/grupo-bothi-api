@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_16_100000) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_21_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -112,6 +112,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_16_100000) do
     t.index ["product_id"], name: "index_stock_movements_on_product_id"
   end
 
+  create_table "tickets", force: :cascade do |t|
+    t.bigint "work_order_id", null: false
+    t.bigint "company_id", null: false
+    t.string "folio", null: false
+    t.integer "status", default: 0, null: false
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "paid_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_tickets_on_company_id"
+    t.index ["folio"], name: "index_tickets_on_folio", unique: true
+    t.index ["status"], name: "index_tickets_on_status"
+    t.index ["work_order_id"], name: "index_tickets_on_work_order_id", unique: true
+  end
+
   create_table "units", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -204,6 +220,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_16_100000) do
   add_foreign_key "products", "companies"
   add_foreign_key "stock_movements", "companies"
   add_foreign_key "stock_movements", "products"
+  add_foreign_key "tickets", "companies"
+  add_foreign_key "tickets", "work_orders"
   add_foreign_key "user_companies", "companies"
   add_foreign_key "user_companies", "users"
   add_foreign_key "work_order_attachments", "work_orders"

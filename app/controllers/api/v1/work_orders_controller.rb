@@ -62,6 +62,8 @@ module Api
       # PATCH /api/v1/work_orders/:id/status
       def update_status
         order = base_scope.find(params[:id])
+        raise ApiErrors::UnprocessableError, I18n.t("work_order.already_cancelled") if order.cancelled?
+
         order.update!(status: params[:status])
         order.update_column(:completed_at, Time.current) if order.completed?
         render json: WorkOrderSerializer.new(order).as_json
@@ -127,7 +129,9 @@ module Api
         params.require(:work_order).permit(
           :title, :description, :priority,
           :status, :due_date, :notes, :employee_id
-        )
+        ).tap do |p|
+          p[:employee_id] = nil if p[:employee_id].blank? || p[:employee_id].to_i.zero?
+        end
       end
 
       def build_items(order, items)
