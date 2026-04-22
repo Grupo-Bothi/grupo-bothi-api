@@ -50,6 +50,30 @@ module Api
         render json: { message: I18n.t("products.deleted") }
       end
 
+      # POST /api/v1/products/import
+      def import
+        raise ApiErrors::BadRequestError.new(message: I18n.t("products.import.file_required")) unless params[:file].present?
+
+        result = Products::ImportService.new(current_company, params[:file]).call
+
+        status = result.errors.any? && result.created.zero? && result.updated.zero? ? :unprocessable_entity : :ok
+        render json: {
+          message: I18n.t("products.import.completed"),
+          created: result.created,
+          updated: result.updated,
+          errors:  result.errors
+        }, status: status
+      end
+
+      # GET /api/v1/products/template
+      def template
+        xlsx = Products::ImportService.generate_template
+        send_data xlsx,
+                  filename:    I18n.t("products.import.template_filename"),
+                  type:        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  disposition: "attachment"
+      end
+
       private
 
       def set_product

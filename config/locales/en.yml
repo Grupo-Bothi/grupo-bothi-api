@@ -29,6 +29,7 @@ en:
 
   employees:
     deactivated: "Employee deactivated"
+    deleted:     "Employee deleted"
     checkin_open: "Employee already has an open check-in"
     no_checkin: "No active check-in found"
     user_created: "User created and linked to employee"
@@ -39,9 +40,38 @@ en:
     insufficient_stock: "Insufficient stock. Available: %{available}"
     menu:
       uncategorized: "Uncategorized"
+    import:
+      completed:          "Import completed"
+      file_required:      "A file is required"
+      unsupported_format: "Unsupported format. Use .xlsx, .xls or .csv"
+      sku_required:       "SKU is required"
+      template_filename:  "products_template.xlsx"
+      template_sheet:     "Products"
+      headers:
+        sku:         "SKU"
+        name:        "NAME"
+        description: "DESCRIPTION"
+        category:    "CATEGORY"
+        price:       "PRICE"
+        unit_cost:   "UNIT COST"
+        stock:       "STOCK"
+        min_stock:   "MIN STOCK"
+        available:   "AVAILABLE"
+      sample:
+        sku:         "PROD-001"
+        name:        "Sample Product"
+        description: "Optional description"
+        category:    "General"
+        price:       "150.00"
+        unit_cost:   "80.00"
+        stock:       "50"
+        min_stock:   "10"
+        available:   "TRUE"
+      hint: "SKU and Name are required. AVAILABLE: TRUE or FALSE."
 
   users:
     not_found: "User not found"
+    deleted:   "User deleted"
 
   companies:
     not_found: "Company not found"

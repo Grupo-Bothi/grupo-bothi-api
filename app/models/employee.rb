@@ -2,7 +2,8 @@
 class Employee < ApplicationRecord
   belongs_to :company
   belongs_to :user, optional: true
-  has_many :attendances
+  has_many :attendances,  dependent: :destroy
+  has_many :work_orders,  dependent: :nullify
 
   enum :status, { active: 0, inactive: 1 }, default: :active
 

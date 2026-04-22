@@ -54,8 +54,8 @@ module Api
       end
 
       def destroy
-        @employee.update!(status: :inactive)
-        render json: { message: I18n.t("employees.deactivated") }
+        @employee.destroy!
+        render json: { message: I18n.t("employees.deleted") }
       end
 
       def checkin

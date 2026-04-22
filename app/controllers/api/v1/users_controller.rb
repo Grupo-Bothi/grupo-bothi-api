@@ -1,6 +1,6 @@
 module Api::V1
   class UsersController < BaseController
-    before_action :set_user, only: [:show, :update, :destroy, :update_active]
+    before_action :set_user, only: [:show, :update, :destroy, :update_active, :active]
 
     # GET /api/v1/users
     def index
@@ -38,23 +38,17 @@ module Api::V1
       render json: @user
     end
 
-    # PATCH /api/v1/users/1/active
+    # PATCH /api/v1/users/1/update_active  or  PATCH /api/v1/users/1/active
     def update_active
-      raise ApiErrors::BadRequestError.new(
-        details: "Active parameter is required",
-      ) unless params[:active].in?([true, false])
-
-      if @user.update(active: params[:active])
-        render json: @user
-      else
-        raise ApiErrors::UnprocessableEntityError.new(details: @user.errors)
-      end
+      @user.update!(active: !@user.active?)
+      render json: @user
     end
+    alias_method :active, :update_active
 
     # DELETE /api/v1/users/1
     def destroy
-      @user.destroy
-      head :no_content
+      @user.destroy!
+      render json: { message: I18n.t("users.deleted") }
     end
 
     private

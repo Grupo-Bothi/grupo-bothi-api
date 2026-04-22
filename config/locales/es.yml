@@ -29,6 +29,7 @@ es:
 
   employees:
     deactivated: "Empleado desactivado"
+    deleted:     "Empleado eliminado"
     checkin_open: "Ya tiene una entrada registrada sin salida"
     no_checkin: "No hay entrada registrada"
     user_created: "Usuario creado y vinculado al empleado"
@@ -39,9 +40,38 @@ es:
     insufficient_stock: "Stock insuficiente. Disponible: %{available}"
     menu:
       uncategorized: "Sin categoría"
+    import:
+      completed:        "Importación completada"
+      file_required:    "Se requiere un archivo"
+      unsupported_format: "Formato no soportado. Use .xlsx, .xls o .csv"
+      sku_required:     "SKU requerido"
+      template_filename: "plantilla_productos.xlsx"
+      template_sheet:   "Productos"
+      headers:
+        sku:         "SKU"
+        name:        "NOMBRE"
+        description: "DESCRIPCIÓN"
+        category:    "CATEGORÍA"
+        price:       "PRECIO"
+        unit_cost:   "COSTO UNITARIO"
+        stock:       "STOCK"
+        min_stock:   "STOCK MÍNIMO"
+        available:   "DISPONIBLE"
+      sample:
+        sku:         "PROD-001"
+        name:        "Producto Ejemplo"
+        description: "Descripción opcional"
+        category:    "General"
+        price:       "150.00"
+        unit_cost:   "80.00"
+        stock:       "50"
+        min_stock:   "10"
+        available:   "TRUE"
+      hint: "SKU y Nombre son obligatorios. DISPONIBLE: TRUE o FALSE."
 
   users:
     not_found: "Usuario no encontrado"
+    deleted:   "Usuario eliminado"
 
   companies:
     not_found: "Empresa no encontrada"

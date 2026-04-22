@@ -14,7 +14,10 @@ Rails.application.routes.draw do
 
       # Users
       resources :users do
-        member { patch :update_active }
+        member do
+          patch :update_active
+          patch :active
+        end
       end
 
       # Uploads
@@ -37,7 +40,11 @@ Rails.application.routes.draw do
 
       # Inventario / Menú
       resources :products do
-        collection { get :menu }
+        collection do
+          get  :menu
+          post :import
+          get  :template
+        end
         resources :stock_movements, only: [:index, :create]
       end
 
