@@ -6,4 +6,8 @@ module Authorizable
   def require_super_admin!
     raise ApiErrors::ForbiddenError.new(message: I18n.t("auth.not_authorized")) unless current_user&.super_admin?
   end
+
+  def require_admin!
+    raise ApiErrors::ForbiddenError.new(message: I18n.t("auth.not_authorized")) unless current_user&.admin? || current_user&.owner? || current_user&.super_admin?
+  end
 end

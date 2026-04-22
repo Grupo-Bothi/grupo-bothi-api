@@ -3,6 +3,8 @@ module Api
   module V1
     class WorkOrdersController < BaseController
 
+      before_action :require_admin!, only: [:destroy]
+
       def index
         orders = base_scope.includes(:employee, :work_order_items)
                            .search(params[:search])
