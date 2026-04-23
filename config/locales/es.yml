@@ -101,8 +101,9 @@ es:
     status:
       pending: "Pendiente de pago"
       paid:    "Pagado"
-    already_paid: "Este ticket ya fue marcado como pagado"
-    not_found:    "Ticket no encontrado"
+    already_paid:  "Este ticket ya fue marcado como pagado"
+    not_found:     "Ticket no encontrado"
+    whatsapp_sent: "Ticket enviado por WhatsApp exitosamente"
 
   reports:
     invalid_period: "Período inválido. Use: weekly, monthly o annual."

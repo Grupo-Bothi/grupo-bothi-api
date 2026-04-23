@@ -80,8 +80,9 @@ en:
     status:
       pending: "Pending payment"
       paid:    "Paid"
-    already_paid: "This ticket has already been marked as paid"
-    not_found:    "Ticket not found"
+    already_paid:  "This ticket has already been marked as paid"
+    not_found:     "Ticket not found"
+    whatsapp_sent: "Ticket successfully sent via WhatsApp"
 
   reports:
     invalid_period: "Invalid period. Use: weekly, monthly or annual."

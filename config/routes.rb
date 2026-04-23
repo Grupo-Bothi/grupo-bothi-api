@@ -12,6 +12,12 @@ Rails.application.routes.draw do
       post "passwords/reset",             to: "passwords#reset"
       put  "passwords/update_with_token", to: "passwords#update_with_token"
 
+      # Profile
+      get    "profile",        to: "profile#show"
+      patch  "profile",        to: "profile#update"
+      post   "profile/avatar", to: "profile#upload_avatar"
+      delete "profile/avatar", to: "profile#remove_avatar"
+
       # Users
       resources :users do
         member do
@@ -65,8 +71,13 @@ Rails.application.routes.draw do
         member do
           patch :mark_as_paid
           get   :download
+          post  :send_whatsapp
         end
       end
+
+      # WhatsApp OTP
+      post "phone_verifications/send_code", to: "phone_verifications#send_code"
+      post "phone_verifications/verify",    to: "phone_verifications#verify"
 
       get "dashboard", to: "dashboard#index"
 

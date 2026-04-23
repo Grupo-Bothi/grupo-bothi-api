@@ -37,6 +37,16 @@ module Api
                   disposition: "attachment"
       end
 
+      def send_whatsapp
+        ticket = find_ticket
+        phone  = params.require(:phone)
+
+        Whatsapp::TicketService.new(ticket, phone: phone).call
+        render json: { message: I18n.t("ticket.whatsapp_sent") }
+      rescue ActionController::ParameterMissing
+        raise ApiErrors::BadRequestError.new(details: "El parámetro 'phone' es requerido")
+      end
+
       private
 
       def find_ticket

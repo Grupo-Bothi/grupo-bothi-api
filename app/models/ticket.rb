@@ -5,6 +5,10 @@ class Ticket < ApplicationRecord
 
   enum :status, { pending: 0, paid: 1 }, default: :pending
 
+  def status_label_text
+    I18n.t("ticket.status.#{status}")
+  end
+
   validates :folio, presence: true, uniqueness: true
   validates :total, presence: true, numericality: { greater_than_or_equal_to: 0 }
 

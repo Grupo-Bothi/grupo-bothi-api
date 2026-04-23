@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :created_work_orders, class_name: 'WorkOrder', as: :created_by
   has_one :employee, dependent: :nullify
+  has_one_attached :avatar
   enum :role, { staff: 0, manager: 1, admin: 2, owner: 3, super_admin: 4 }, default: :staff
 
   # Scopes para filtros
