@@ -104,6 +104,14 @@ es:
     already_paid: "Este ticket ya fue marcado como pagado"
     not_found:    "Ticket no encontrado"
 
+  reports:
+    invalid_period: "Período inválido. Use: weekly, monthly o annual."
+    invalid_group_by: "Agrupación inválida. Use: week, month o year."
+    period:
+      weekly:  "Semanal"
+      monthly: "Mensual"
+      annual:  "Anual"
+
   work_order:
     already_cancelled: "La orden de trabajo ya está cancelada"
     status:

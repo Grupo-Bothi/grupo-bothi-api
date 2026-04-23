@@ -70,6 +70,12 @@ Rails.application.routes.draw do
 
       get "dashboard", to: "dashboard#index"
 
+      # Reports
+      get "reports/summary",  to: "reports#summary"
+      get "reports/income",   to: "reports#income"
+      get "reports/expenses", to: "reports#expenses"
+      get "reports/payroll",  to: "reports#payroll"
+
       resources :work_orders do
         member do
           patch :update_status

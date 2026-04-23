@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 bin/rails server              # Start dev server on port 3000
-bin/rails test                # Run all tests (parallel)
-bin/rails test test/models/user_test.rb  # Run a single test file
+bin/rails test                # Run all tests (parallel, uses fixtures)
+bin/rails test test/models/user_test.rb          # Run a single model test
+bin/rails test test/controllers/api/v1/users_controller_test.rb  # Run a controller test
 bin/rails db:migrate          # Run pending migrations
 bin/rails db:seed             # Seed the database
 bin/rails routes              # Show all API routes
@@ -15,6 +16,8 @@ bin/rails console             # Interactive console
 bin/rubocop                   # Lint (Rails Omakase style)
 bin/brakeman                  # Security scan
 ```
+
+Tests live in `test/models/` and `test/controllers/api/v1/`. All tests use fixtures (`test/fixtures/`). Parallel execution is enabled by default.
 
 ## Architecture
 
@@ -54,10 +57,11 @@ The `Authenticable` and `Authorizable` concerns live in `app/controllers/concern
 | `Subscription` | Belongs to Company; statuses: `trialing/active/past_due/cancelled/expired`; `active_access?` returns true for trialing (within trial), active, or past_due |
 | `WorkOrder` | Core work entity; statuses: `pending → in_progress → in_review → completed → cancelled`; priorities: `low/medium/high/urgent` |
 | `WorkOrderItem` | Checklist items on a work order; ordered by `position`; `subtotal = unit_price * quantity` |
-| `Ticket` | Auto-generated via `after_commit` when a WorkOrder transitions to `completed` and has no ticket yet; folio format `T-000001` |
+| `Ticket` | Auto-generated via `after_commit` when a WorkOrder transitions to `completed` and has no ticket yet; folio format `T-000001`; statuses: `pending/paid`; `mark_as_paid` endpoint |
 | `Product` | Inventory item with `StockMovement` sub-resource; has `menu` collection route; supports Excel import/export |
 | `Attendance` | Check-in/out records; types: `normal/late/absent` |
 | `Unit` | Measurement units for products |
+| Dashboard | `GET /api/v1/dashboard` — aggregate stats for employees, users, work orders, tickets, inventory, and attendance (today + month) |
 
 ### Key Patterns
 
@@ -65,9 +69,20 @@ The `Authenticable` and `Authorizable` concerns live in `app/controllers/concern
 
 **Serializers** (`app/serializers/`) are plain Ruby classes with `initialize(record, detailed: false)` and `as_json`. Pass `detailed: true` for full nested data (e.g., `WorkOrderSerializer` includes items array only when detailed). Most index actions use Active Model Serializers directly; work orders and tickets use the plain-class serializers.
 
+**Email**: Transactional email is sent via `ResendMailer` (`app/mailers/resend_mailer.rb`), a plain Ruby class (not ActionMailer) that calls the Resend API directly. Do NOT use ActionMailer or `deliver_later` for these emails. Service objects in `app/services/email/` (`SetPasswordService`, `PasswordResetService`) wrap `ResendMailer`.
+
+**Employee → User auto-creation**: When creating an `Employee` with a non-blank `email`, `EmployeesController#create` automatically creates a `User` (via `parsed_name_parts`), links it via `user_companies`, and calls `Email::SetPasswordService` to send a set-password email. The user starts with `active: false`.
+
+**Password flows** (`PasswordsController`, inherits `BaseController`):
+- `PUT /passwords/update` — requires current password; changes password for authenticated user
+- `POST /passwords/reset` — sends password-reset email (token-based); public via `Email::PasswordResetService`
+- `PUT /passwords/update_with_token` — sets new password using reset token
+
+**Company routing**: `resource :company` (singular) — scoped to current company; `resources :companies` (plural) — global CRUD, super_admin only.
+
 **Services** are organized into subdirectories:
 - `app/services/pdf/` — `TicketPdfService` generates Prawn A4 PDF
-- `app/services/email/` — email helpers
+- `app/services/email/` — `SetPasswordService`, `PasswordResetService` (wrap `ResendMailer`)
 - `app/services/users/` — user-related logic
 - `app/services/products/` — `ImportService` for Excel import (roo); template download uses caxlsx
 - `app/services/subscriptions/` — `CreateCheckoutService` (Stripe Checkout), `CancelService`, `HandleWebhookService`
