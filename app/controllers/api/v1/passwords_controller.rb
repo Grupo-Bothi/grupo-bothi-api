@@ -54,14 +54,17 @@ module Api::V1
     def update_with_token
       validate_token_update_params
 
-      if @user.update(password: params[:new_password], active: true)
-        render json: {
-          message: "Contraseña restablecida exitosamente",
-          user: UserSerializer.new(@user),
-        }, status: :ok
-      else
-        raise ApiErrors::UnprocessableEntityError.new(details: @user.errors.full_messages)
+      ActiveRecord::Base.transaction do
+        @user.update!(password: params[:new_password], active: true)
+        @user.employee&.update!(status: :active)
       end
+
+      render json: {
+        message: "Contraseña restablecida exitosamente",
+        user: UserSerializer.new(@user),
+      }, status: :ok
+    rescue ActiveRecord::RecordInvalid => e
+      raise ApiErrors::UnprocessableEntityError.new(details: e.record.errors.full_messages)
     end
 
     private

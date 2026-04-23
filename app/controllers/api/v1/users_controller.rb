@@ -5,6 +5,7 @@ module Api::V1
     # GET /api/v1/users
     def index
       users = User.includes(:companies)
+        .non_employees
         .by_email(params[:email])
         .by_role(params[:role])
         .search(params[:search] || params[:text])
@@ -23,9 +24,12 @@ module Api::V1
 
     # POST /api/v1/users
     def create
-      @user = User.new(user_create_params)
+      attrs = user_create_params
+      attrs[:password] = SecureRandom.hex(12) if attrs[:password].blank?
+
+      @user = User.new(attrs)
       if @user.save
-        #send_password_reset_email(@user)
+        send_set_password_email(@user)
         render json: UserSerializer.new(@user).serializable_hash, status: :created
       else
         render_error_response
@@ -59,10 +63,11 @@ module Api::V1
       raise ApiErrors::NotFoundError.new(message: I18n.t("users.not_found"))
     end
 
-    def send_password_reset_email(user)
-      Email::PasswordResetService.new(user).call
-    rescue ArgumentError => e
-      Rails.logger.error "PasswordResetService error: #{e.message}"
+    def send_set_password_email(user)
+      company_name = user.companies.pluck(:name).join(", ").presence
+      Email::SetPasswordService.new(user, company_name: company_name).call
+    rescue => e
+      Rails.logger.error "[UsersController] SetPasswordService error class=#{e.class} message=#{e.message}"
     end
 
     def render_error_response

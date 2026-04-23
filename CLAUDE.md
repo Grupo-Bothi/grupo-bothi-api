@@ -29,25 +29,33 @@ Every request must include `X-Company-Id` header. `BaseController#current_compan
 All endpoints live under `/api/v1/`. The base controller (`app/controllers/api/v1/base_controller.rb`) handles:
 - JWT authentication via `Authorization: Bearer <token>` — decoded with `SECRET_KEY_BASE` (HS256, 24h expiry)
 - Company scoping (multi-tenant context)
+- Subscription gate via `check_subscription!` — auto-starts a 30-day trial if none exists; blocks if expired/cancelled
 - Standardized error handling via `rescue_from` with `ApiErrors` module in `app/errors/api_errors.rb`
 - Sorting via `apply_sort(scope, allowed: %i[...])` — only allowlisted columns accepted
 - Pagination via Pagy (`limit` param, max 100); use `paginate_response(@pagy, serialized)` in controllers
 
-The `Authenticable` and `Authorizable` concerns live in `app/controllers/concerns/`. `Authorizable` only provides `require_super_admin!` — role checks beyond that are done inline in controllers.
+The `Authenticable` and `Authorizable` concerns live in `app/controllers/concerns/`. `Authorizable` provides:
+- `require_super_admin!` — super_admin only
+- `require_admin!` — admin, owner, or super_admin
 
 `AuthenticationController` inherits `ApplicationController` directly (not `BaseController`) since login is public. Login auto-creates an attendance checkin for the day if the user has an associated `Employee` and hasn't checked in yet.
+
+`UploadsController` also inherits `ApplicationController` directly (skips auth); it manages Active Storage blobs for images (max 10 MB, jpeg/png/gif/webp/svg).
+
+`SubscriptionsController` skips the `check_subscription!` before_action so users with expired subscriptions can still access billing.
 
 ### Domain Model
 
 | Entity | Notes |
 |---|---|
 | `User` | Roles: `staff`, `manager`, `admin`, `owner`, `super_admin`; uses `has_secure_password` |
-| `Company` | Tenant container; plans: `starter`, `business`, `enterprise` |
+| `Company` | Tenant container; plans: `starter`, `business`, `enterprise`; holds `stripe_id` |
 | `Employee` | Company staff; optional `user` association; `parsed_name_parts` splits `name` for User creation |
+| `Subscription` | Belongs to Company; statuses: `trialing/active/past_due/cancelled/expired`; `active_access?` returns true for trialing (within trial), active, or past_due |
 | `WorkOrder` | Core work entity; statuses: `pending → in_progress → in_review → completed → cancelled`; priorities: `low/medium/high/urgent` |
 | `WorkOrderItem` | Checklist items on a work order; ordered by `position`; `subtotal = unit_price * quantity` |
 | `Ticket` | Auto-generated via `after_commit` when a WorkOrder transitions to `completed` and has no ticket yet; folio format `T-000001` |
-| `Product` | Inventory item with `StockMovement` sub-resource; has `menu` collection route |
+| `Product` | Inventory item with `StockMovement` sub-resource; has `menu` collection route; supports Excel import/export |
 | `Attendance` | Check-in/out records; types: `normal/late/absent` |
 | `Unit` | Measurement units for products |
 
@@ -61,7 +69,8 @@ The `Authenticable` and `Authorizable` concerns live in `app/controllers/concern
 - `app/services/pdf/` — `TicketPdfService` generates Prawn A4 PDF
 - `app/services/email/` — email helpers
 - `app/services/users/` — user-related logic
-- `app/services/password_reset_service.rb` / `ticket_pdf_service.rb` at root level (legacy stubs)
+- `app/services/products/` — `ImportService` for Excel import (roo); template download uses caxlsx
+- `app/services/subscriptions/` — `CreateCheckoutService` (Stripe Checkout), `CancelService`, `HandleWebhookService`
 
 **Error classes** (`app/errors/api_errors.rb`): `ApiErrors::BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `UnprocessableEntityError` — all inherit `BaseError` and render `{ error: { status, message, details } }`.
 
@@ -70,6 +79,10 @@ The `Authenticable` and `Authorizable` concerns live in `app/controllers/concern
 ### WorkOrder → Ticket lifecycle
 
 When a `WorkOrder` status changes to `completed`, an `after_commit` callback calls `generate_ticket!` if no ticket exists yet. The `Ticket` copies the work order `total`, reserves a temp folio UUID, then overwrites it with `T-000001` format in an `after_create` callback. `Ticket#download` renders via `Pdf::TicketPdfService`.
+
+### Subscription & Stripe
+
+Paid plans (`business`, `enterprise`) go through a Stripe Checkout Session created by `Subscriptions::CreateCheckoutService`. Stripe sends webhook events to `POST /api/v1/stripe/webhooks` (unauthenticated), handled by `Subscriptions::HandleWebhookService`. Pricing and Stripe price IDs are configured via env vars.
 
 ### Background Jobs & Caching
 
@@ -92,4 +105,7 @@ Dockerized with Kamal for orchestration. Also has `render.yaml` for Render.com d
 | `SECRET_KEY_BASE` | JWT signing key |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Transactional email |
 | `FRONTEND_URL` | CORS allowed origin (default: `http://localhost:4200`) |
+| `STRIPE_BUSINESS_MONTHLY_PRICE_ID` | Stripe price ID for business monthly plan |
+| `STRIPE_ENTERPRISE_ANNUAL_PRICE_ID` | Stripe price ID for enterprise annual plan |
+| `ENTERPRISE_AMOUNT_CENTS` | Enterprise plan price in MXN cents (default: 756000) |
 | Cloud storage keys | Cloudinary or S3-compatible credentials |

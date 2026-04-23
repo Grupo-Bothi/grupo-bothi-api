@@ -5,7 +5,7 @@ class Employee < ApplicationRecord
   has_many :attendances,  dependent: :destroy
   has_many :work_orders,  dependent: :nullify
 
-  enum :status, { active: 0, inactive: 1 }, default: :active
+  enum :status, { active: 0, inactive: 1 }, default: :inactive
 
   validates :name, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true

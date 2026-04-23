@@ -58,19 +58,20 @@ module Email
       ResendMailer.password_reset(
         user: @user,
         reset_url: @reset_url,
+        company_name: @user.companies.first&.name,
       )
     end
 
     def email_sent_successfully?(response)
-      response.is_a?(HTTParty::Response) && response.success?
+      response.is_a?(Hash) && response["id"].present?
     end
 
     def log_success(response)
-      Rails.logger.info "[PasswordReset] Email sent to #{@user.email}. Response: #{response.body}"
+      Rails.logger.info "[PasswordReset] Email sent to #{@user.email}. Response: #{response.inspect}"
     end
 
     def handle_email_failure(response)
-      error_message = "Failed to send email. Response: #{response.body}"
+      error_message = "Failed to send email. Response: #{response.inspect}"
       Rails.logger.error "[PasswordReset] #{error_message}"
       { success: false, error: error_message }
     end

@@ -40,8 +40,9 @@ Rails.application.routes.draw do
       # Employees + checkin/checkout + sus asistencias
       resources :employees do
         member do
-          post :checkin
-          post :checkout
+          post  :checkin
+          post  :checkout
+          patch :active
         end
       end
 
@@ -66,6 +67,8 @@ Rails.application.routes.draw do
           get   :download
         end
       end
+
+      get "dashboard", to: "dashboard#index"
 
       resources :work_orders do
         member do

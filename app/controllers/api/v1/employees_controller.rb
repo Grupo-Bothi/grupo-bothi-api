@@ -2,7 +2,7 @@
 module Api
   module V1
     class EmployeesController < BaseController
-      before_action :set_employee, only: [:show, :update, :destroy, :checkin, :checkout]
+      before_action :set_employee, only: [:show, :update, :destroy, :checkin, :checkout, :active]
 
       def index
         employees = current_company.employees.includes(:user).search(params[:search])
@@ -21,30 +21,26 @@ module Api
         ActiveRecord::Base.transaction do
           email = params.dig(:employee, :email)
           phone = params.dig(:employee, :phone)
-          employee = current_company.employees.build(employee_params.except(:email, :phone))
-          temp_password = nil
+          employee = current_company.employees.build(employee_params.except(:email, :phone, :status))
 
           if email.present?
-            temp_password = 'Pass123'
             user = User.create!(
               **employee.parsed_name_parts,
               email:    email,
               phone:    phone.to_s,
-              password: temp_password,
+              password: SecureRandom.hex(12),
               role:     :staff,
-              active:   true
+              active:   false
             )
             employee.user  = user
             employee.email = email
             employee.phone = phone
             current_company.user_companies.find_or_create_by!(user: user)
+            send_set_password_email(user)
           end
 
           employee.save!
-
-          response_data = ActiveModelSerializers::SerializableResource.new(employee).as_json
-          response_data[:temp_password] = temp_password if temp_password
-          render json: response_data, status: :created
+          render json: ActiveModelSerializers::SerializableResource.new(employee).as_json, status: :created
         end
       end
 
@@ -54,8 +50,18 @@ module Api
       end
 
       def destroy
-        @employee.destroy!
+        ActiveRecord::Base.transaction do
+          user = @employee.user
+          @employee.destroy!
+          user&.destroy!
+        end
         render json: { message: I18n.t("employees.deleted") }
+      end
+
+      def active
+        new_status = @employee.active? ? :inactive : :active
+        @employee.update!(status: new_status)
+        render json: ActiveModelSerializers::SerializableResource.new(@employee).as_json
       end
 
       def checkin
@@ -98,6 +104,12 @@ module Api
 
       def employee_params
         params.require(:employee).permit(:name, :position, :department, :salary, :status, :email, :phone)
+      end
+
+      def send_set_password_email(user)
+        Email::SetPasswordService.new(user, company_name: current_company.name).call
+      rescue => e
+        Rails.logger.error "[EmployeesController] SetPasswordService error: #{e.message}"
       end
     end
   end

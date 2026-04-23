@@ -1,0 +1,121 @@
+module Api
+  module V1
+    class DashboardController < BaseController
+      def index
+        render json: {
+          employees:   employees_stats,
+          users:       users_stats,
+          work_orders: work_orders_stats,
+          tickets:     tickets_stats,
+          inventory:   inventory_stats,
+          attendance:  attendance_stats
+        }
+      end
+
+      private
+
+      def employees_stats
+        employees = current_company.employees
+        counts    = employees.group(:status).count
+
+        {
+          total:    employees.count,
+          active:   counts["active"].to_i,
+          inactive: counts["inactive"].to_i
+        }
+      end
+
+      def users_stats
+        users      = current_company.users
+        role_counts = users.group(:role).count
+
+        {
+          total:   users.count,
+          by_role: {
+            staff:       role_counts["staff"].to_i,
+            manager:     role_counts["manager"].to_i,
+            admin:       role_counts["admin"].to_i,
+            owner:       role_counts["owner"].to_i,
+            super_admin: role_counts["super_admin"].to_i
+          }
+        }
+      end
+
+      def work_orders_stats
+        orders         = current_company.work_orders
+        status_counts  = orders.group(:status).count
+        priority_counts = orders.group(:priority).count
+
+        {
+          total:       orders.count,
+          by_status:   {
+            pending:     status_counts["pending"].to_i,
+            in_progress: status_counts["in_progress"].to_i,
+            in_review:   status_counts["in_review"].to_i,
+            completed:   status_counts["completed"].to_i,
+            cancelled:   status_counts["cancelled"].to_i
+          },
+          by_priority: {
+            low:    priority_counts["low"].to_i,
+            medium: priority_counts["medium"].to_i,
+            high:   priority_counts["high"].to_i,
+            urgent: priority_counts["urgent"].to_i
+          }
+        }
+      end
+
+      def tickets_stats
+        tickets       = current_company.tickets
+        status_counts = tickets.group(:status).count
+
+        pending_count = status_counts["pending"].to_i
+        paid_count    = status_counts["paid"].to_i
+
+        total_revenue   = tickets.where(status: :paid).sum(:total)
+        pending_revenue = tickets.where(status: :pending).sum(:total)
+
+        {
+          total:           tickets.count,
+          pending:         pending_count,
+          paid:            paid_count,
+          total_revenue:   total_revenue.to_f,
+          pending_revenue: pending_revenue.to_f
+        }
+      end
+
+      def inventory_stats
+        products    = current_company.products
+        avail_counts = products.group(:available).count
+
+        low_stock_threshold = 5
+
+        {
+          total:       products.count,
+          available:   avail_counts[true].to_i,
+          unavailable: avail_counts[false].to_i,
+          low_stock:   products.where("stock > 0 AND stock <= ?", low_stock_threshold).count,
+          out_of_stock: products.where(stock: 0).count
+        }
+      end
+
+      def attendance_stats
+        today      = Date.today
+        today_range = today.beginning_of_day..today.end_of_day
+        month_range = today.beginning_of_month..today.end_of_month
+
+        today_records = current_company.attendances.where(checkin_at: today_range)
+        type_counts   = today_records.group(:attendance_type).count
+
+        {
+          today: {
+            total:  today_records.count,
+            normal: type_counts["normal"].to_i,
+            late:   type_counts["late"].to_i,
+            absent: type_counts["absent"].to_i
+          },
+          this_month: current_company.attendances.where(checkin_at: month_range).count
+        }
+      end
+    end
+  end
+end

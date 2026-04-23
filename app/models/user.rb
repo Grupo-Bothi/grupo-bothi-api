@@ -13,6 +13,7 @@ class User < ApplicationRecord
   scope :by_role, ->(role) { where(role: role) if role.present? }
   scope :sorted, -> { order(created_at: :desc) }
   scope :excluding_system_emails, -> { where.not(email: ["grupobothi@mailinator.com"]) }
+  scope :non_employees, -> { left_joins(:employee).where(employees: { id: nil }) }
   scope :by_text, ->(text) {
           return unless text
 
