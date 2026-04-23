@@ -2,6 +2,7 @@
 class Product < ApplicationRecord
   belongs_to :company
   has_many :stock_movements, dependent: :destroy
+  has_many :work_order_items, dependent: :destroy
 
   before_validation { self.stock ||= 0 }
 

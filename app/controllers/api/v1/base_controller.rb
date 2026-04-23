@@ -10,6 +10,7 @@ module Api
       rescue_from ActiveRecord::RecordInvalid,   with: :handle_invalid
 
       before_action :authenticate_request
+      before_action :check_subscription!
 
       private
 
@@ -26,7 +27,8 @@ module Api
         @current_company ||= begin
           company_id = request.headers["X-Company-Id"].presence
           raise ApiErrors::BadRequestError.new(details: I18n.t("auth.no_company")) if company_id.blank?
-          current_user.companies.find(company_id)
+          scope = current_user.super_admin? ? Company : current_user.companies
+          scope.find(company_id)
         rescue ActiveRecord::RecordNotFound
           raise ApiErrors::ForbiddenError.new(details: I18n.t("auth.no_company"))
         end
@@ -39,6 +41,19 @@ module Api
       def handle_not_found
         render json: ApiErrors::NotFoundError.new(details: I18n.t("errors.resource_not_found")).as_json,
                status: :not_found
+      end
+
+      def check_subscription!
+        return if current_user.super_admin?
+
+        subscription = current_company.subscription
+        subscription = Subscription.start_trial!(current_company) if subscription.nil?
+
+        return if subscription.active_access?
+
+        raise ApiErrors::ForbiddenError.new(
+          details: I18n.t("errors.subscription.inactive")
+        )
       end
 
       def handle_invalid(e)

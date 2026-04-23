@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_21_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_22_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -110,6 +110,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_21_000001) do
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_stock_movements_on_company_id"
     t.index ["product_id"], name: "index_stock_movements_on_product_id"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.integer "plan", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.integer "billing_cycle", default: 0, null: false
+    t.integer "amount_cents", default: 0, null: false
+    t.datetime "trial_ends_at"
+    t.datetime "current_period_start"
+    t.datetime "current_period_end"
+    t.string "stripe_subscription_id"
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_subscriptions_on_company_id"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id", unique: true, where: "(stripe_subscription_id IS NOT NULL)"
+    t.index ["trial_ends_at"], name: "index_subscriptions_on_trial_ends_at"
   end
 
   create_table "tickets", force: :cascade do |t|
@@ -220,6 +239,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_21_000001) do
   add_foreign_key "products", "companies"
   add_foreign_key "stock_movements", "companies"
   add_foreign_key "stock_movements", "products"
+  add_foreign_key "subscriptions", "companies"
   add_foreign_key "tickets", "companies"
   add_foreign_key "tickets", "work_orders"
   add_foreign_key "user_companies", "companies"

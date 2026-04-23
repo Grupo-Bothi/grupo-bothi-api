@@ -27,6 +27,16 @@ Rails.application.routes.draw do
       resource  :company,   only: [:show, :update]
       resources :companies, only: [:index, :show, :create, :update, :destroy]
 
+      # Suscripción de la empresa actual
+      resource :subscription, only: [:show, :destroy] do
+        collection do
+          post :checkout
+        end
+      end
+
+      # Webhooks de Stripe (sin autenticación)
+      post "stripe/webhooks", to: "stripe_webhooks#create"
+
       # Employees + checkin/checkout + sus asistencias
       resources :employees do
         member do

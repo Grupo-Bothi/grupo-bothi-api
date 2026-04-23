@@ -14,6 +14,10 @@ es:
       greater_than_or_equal_to: "debe ser mayor o igual a %{count}"
       less_than_or_equal_to: "debe ser menor o igual a %{count}"
       blank: "no puede estar vacío"
+    subscription:
+      inactive: "Tu suscripción ha expirado o fue cancelada. Actualiza tu plan para continuar."
+      invalid_plan: "Plan inválido. Debe ser 'business' o 'enterprise'."
+      stripe_not_configured: "Stripe no está configurado. Contacta al soporte."
 
   auth:
     header_missing: "Encabezado de autorización faltante"
@@ -75,6 +79,23 @@ es:
 
   companies:
     not_found: "Empresa no encontrada"
+
+  subscription:
+    trial_started: "Período de prueba iniciado (30 días)"
+    cancelled: "Suscripción cancelada"
+    status:
+      trialing:  "Prueba gratuita"
+      active:    "Activa"
+      past_due:  "Pago pendiente"
+      cancelled: "Cancelada"
+      expired:   "Expirada"
+    plan:
+      starter:    "Starter"
+      business:   "Business"
+      enterprise: "Enterprise"
+    billing_cycle:
+      monthly: "Mensual"
+      annual:  "Anual"
 
   ticket:
     status:
